@@ -1,0 +1,25 @@
+#!/bin/bash - 
+#===============================================================================
+#
+#          FILE: getlinks.sh
+#
+#          TODO: add differentiation of soft- & hard-links
+#===============================================================================
+
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+default_dir="$(pwd)"
+search_dir=${1:-$default_dir}
+
+if [[ "$search_dir" != '/'* ]]
+then
+	search_dir="${PWD}/$search_dir"
+fi
+
+printf "${CYAN}soft-links in directory: ${WHITE}\'$search_dir\'${NC}\n${WHITE}---\n${NC}"
+
+ls -l "$search_dir" | grep -P '^l' | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~'
+
+printf "${WHITE}---\n${NC}"
