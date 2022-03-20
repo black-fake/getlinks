@@ -6,6 +6,8 @@
 #          TODO: add differentiation of soft- & hard-links
 #===============================================================================
 
+RED='\033[1;31m'
+BLUE='\033[1;34m'
 CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m'
@@ -32,7 +34,17 @@ function printLinkList(){
 	done
 }
 
+function printOutput(){
+	printf "${BLUE}${linkAmount} ${CYAN}soft-links in directory: ${WHITE}\'$search_dir\'${NC}\n${WHITE}---\n${NC}"
+	
+	printLinkList
+	
+	printf "${WHITE}---\n${NC}"
+}
 
+function printNoOutput(){
+	printf "${RED} No soft-links found in directory: ${WHITE}\'$search_dir\'${NC}\n" >&2
+}
 
 if [[ "$search_dir" != '/'* ]]
 then
@@ -41,8 +53,9 @@ fi
 
 gatherLinkList
 
-printf "${CYAN}${linkAmount} soft-links in directory: ${WHITE}\'$search_dir\'${NC}\n${WHITE}---\n${NC}"
-
-printLinkList
-
-printf "${WHITE}---\n${NC}"
+if [[ "$linkAmount" -eq 0 ]]
+then
+	printNoOutput
+else
+	printOutput
+fi
