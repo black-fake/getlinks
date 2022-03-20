@@ -12,14 +12,37 @@ NC='\033[0m'
 
 default_dir="$(pwd)"
 search_dir=${1:-$default_dir}
+list=()
+linkAmount=0
+
+function gatherLinkList(){
+	while read line
+	do
+		list+=("$line")
+	done< <(ls -l "$search_dir" | grep -P '^l' | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~')
+
+	linkAmount=${#list[@]}
+}
+
+function printLinkList(){
+	i=0
+	until [[ "$i" == "$linkAmount" ]];do
+		echo "${list[$i]}"
+		i=$((i+1))
+	done
+}
+
+
 
 if [[ "$search_dir" != '/'* ]]
 then
 	search_dir="${PWD}/$search_dir"
 fi
 
-printf "${CYAN}soft-links in directory: ${WHITE}\'$search_dir\'${NC}\n${WHITE}---\n${NC}"
+gatherLinkList
 
-ls -l "$search_dir" | grep -P '^l' | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~'
+printf "${CYAN}${linkAmount} soft-links in directory: ${WHITE}\'$search_dir\'${NC}\n${WHITE}---\n${NC}"
+
+printLinkList
 
 printf "${WHITE}---\n${NC}"
