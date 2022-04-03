@@ -50,6 +50,10 @@ if [[ "$search_dir" != '/'* ]]
 then
 	search_dir="${PWD}/$search_dir"
 fi
+if [[ "$search_dir" != *'/' ]]
+then
+	search_dir="${search_dir}/"
+fi
 
 gatherLinkList
 
