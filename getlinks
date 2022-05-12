@@ -13,15 +13,31 @@ WHITE='\033[1;37m'
 NC='\033[0m'
 
 default_dir="$(pwd)"
-search_dir=${1:-$default_dir}
+search_dir="${default_dir}"
 list=()
 linkAmount=0
+search_pattern=''
+
+function print_help(){
+
+# cli tool to list all symbolic links (and where they point to) in a folder
+#
+#     USAGE: getlinks [options] [folder_to_check]
+#
+#     OPTIONS:
+#         -h | --help	→ print this help message
+#         -rg | --grep	→ filter results by regex pattern
+
+
+printf "${CYAN}cli tool to list all symbolic links (and where they point to) in a folder\n\n\tUSAGE: getlinks [options] [folder_to_check]\n\n\tOPTIONS:\n\t\t-h | --help\t→ print this help message\n\t\t-rg | --grep\t→ filter results by regex pattern${NC}\n"
+exit 0
+}
 
 function gatherLinkList(){
 	while read line
 	do
 		list+=("$line")
-	done< <(ls -l "$search_dir" | grep -P '^l' | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~')
+	done< <(ls -l "$search_dir" | grep -P '^l' | grep -P "${search_pattern}" | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~')
 
 	linkAmount=${#list[@]}
 }
@@ -45,6 +61,26 @@ function printOutput(){
 function printNoOutput(){
 	printf "${RED} No soft-links found in directory: ${WHITE}\'$search_dir\'${NC}\n" >&2
 }
+
+# processing arguments ------------------
+loop_rounds=$(bc<<<"scale=0;$#/2+1")
+while [[ "$loop_rounds" -gt 0 ]]
+do
+	if [[ "$1" == '-h' || "$1" == '--help' ]]
+	then
+		print_help
+		shift 1
+	elif [[ "$1" == '-rg' || "$1" == '--grep' ]]
+	then
+		search_pattern="$2"
+		shift 2
+	else
+		search_dir="$1"
+		shift 1
+	fi
+	loop_rounds=$((loop_rounds-1))
+done
+# ---------------------------------------
 
 if [[ "$search_dir" != '/'* ]]
 then
