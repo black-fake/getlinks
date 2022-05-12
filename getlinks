@@ -28,7 +28,6 @@ function print_help(){
 #         -h | --help	→ print this help message
 #         -rg | --grep	→ filter results by regex pattern
 
-
 printf "${CYAN}cli tool to list all symbolic links (and where they point to) in a folder\n\n\tUSAGE: getlinks [options] [folder_to_check]\n\n\tOPTIONS:\n\t\t-h | --help\t→ print this help message\n\t\t-rg | --grep\t→ filter results by regex pattern${NC}\n"
 exit 0
 }
@@ -63,7 +62,8 @@ function printNoOutput(){
 }
 
 # processing arguments ------------------
-loop_rounds=$(bc<<<"scale=0;$#/2+1")
+#loop_rounds=$(bc<<<"scale=0;$#/2+1")
+loop_rounds=$((${#}/2+1))
 while [[ "$loop_rounds" -gt 0 ]]
 do
 	if [[ "$1" == '-h' || "$1" == '--help' ]]
