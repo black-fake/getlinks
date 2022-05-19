@@ -17,6 +17,7 @@ search_dir="${default_dir}"
 list=()
 linkAmount=0
 search_pattern=''
+list_hidden='no'
 
 function print_help(){
 
@@ -25,18 +26,25 @@ function print_help(){
 #     USAGE: getlinks [options] [folder_to_check]
 #
 #     OPTIONS:
-#         -h | --help	→ print this help message
-#         -rg | --grep	→ filter results by regex pattern
+#         --help	 → print this help message
+#         -g | --grep	 → filter results by regex pattern
+#         -h | --hidden	 → list hidden files, too
 
-printf "${CYAN}cli tool to list all symbolic links (and where they point to) in a folder\n\n\tUSAGE: getlinks [options] [folder_to_check]\n\n\tOPTIONS:\n\t\t-h | --help\t→ print this help message\n\t\t-rg | --grep\t→ filter results by regex pattern${NC}\n"
+printf "${CYAN}cli tool to list all symbolic links (and where they point to) in a folder\n\n\tUSAGE: getlinks [options] [folder_to_check]\n\n\tOPTIONS:\n\t\t--help\t → print this help message\n\t\t-g | --grep\t → filter results by regex pattern\n\t\t-h | --hidden\t → list hidden files, too${NC}\n"
 exit 0
 }
 
 function gatherLinkList(){
+	if [[ "$list_hidden" == 'no' ]]
+	then
+		raw_link_list=$(ls -l "$search_dir")
+	else [[ "$list_hidden" == 'yes' ]]
+		raw_link_list=$(ls -la "$search_dir")
+	fi
 	while read line
 	do
 		list+=("$line")
-	done< <(ls -l "$search_dir" | grep -P '^l' | grep -P "${search_pattern}" | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~')
+	done< <( grep -P '^l' <<< ${raw_link_list} | grep -P "${search_pattern}" | sed 's~[a-z ]\+[0-9][a-zA-Z ]\+.\+ [0-9][0-9]:\?[0-9][0-9] ~~' | sed 's~->~→~g;s~^ *~~;s~^~ ~')
 
 	linkAmount=${#list[@]}
 }
@@ -66,14 +74,18 @@ function printNoOutput(){
 loop_rounds=$((${#}/2+1))
 while [[ "$loop_rounds" -gt 0 ]]
 do
-	if [[ "$1" == '-h' || "$1" == '--help' ]]
+	if [[ "$1" == '--help' ]]
 	then
 		print_help
 		shift 1
-	elif [[ "$1" == '-rg' || "$1" == '--grep' ]]
+	elif [[ "$1" == '-g' || "$1" == '--grep' ]]
 	then
 		search_pattern="$2"
 		shift 2
+	elif [[ "$1" == '-h' || "$1" == '--hidden' ]]
+	then
+		list_hidden='yes'
+		shift 1
 	else
 		search_dir="$1"
 		shift 1
