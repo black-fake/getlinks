@@ -108,6 +108,7 @@ gatherLinkList
 if [[ "$linkAmount" -eq 0 ]]
 then
 	printNoOutput
+	exit 1
 else
 	printOutput
 fi
