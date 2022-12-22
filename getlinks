@@ -18,6 +18,7 @@ list=()
 linkAmount=0
 search_pattern=''
 list_hidden='no'
+parsed_arguments=''
 
 function print_help(){
 
@@ -70,27 +71,23 @@ function printNoOutput(){
 }
 
 # processing arguments ------------------
-#loop_rounds=$(bc<<<"scale=0;$#/2+1")
-loop_rounds=$((${#}/2+1))
-while [[ "$loop_rounds" -gt 0 ]]
+parsed_arguments=$(getopt -a -n getlinks -o -hg: --long help,grep:,hidden -- "$@")
+if [ "$?" != "0" ]; then
+    print_help
+fi
+
+eval set -- "$parsed_arguments"
+unset parsed_arguments
+
+while :
 do
-	if [[ "$1" == '--help' ]]
-	then
-		print_help
-		shift 1
-	elif [[ "$1" == '-g' || "$1" == '--grep' ]]
-	then
-		search_pattern="$2"
-		shift 2
-	elif [[ "$1" == '-h' || "$1" == '--hidden' ]]
-	then
-		list_hidden='yes'
-		shift 1
-	else
-		search_dir="$1"
-		shift 1
-	fi
-	loop_rounds=$((loop_rounds-1))
+    case "$1" in
+      --help) print_help; shift;;
+      -g | --grep) search_pattern="$2"; shift 2;;
+      -h | --hidden) list_hidden='yes'; shift;;
+      --) shift; break;;
+      *) search_dir="$(realpath $1)"; shift;;
+    esac
 done
 # ---------------------------------------
 
